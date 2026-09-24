@@ -9,7 +9,7 @@ CORS(app)
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 SERVICES = {
-    "Sexchat": 1,
+    "Sexchat": 2000,
     "Video personalizzato": 2000,
     "Videochiamata": 4000
 }
