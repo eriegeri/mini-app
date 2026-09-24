@@ -52,7 +52,7 @@
   <h1>I miei servizi</h1>
 
   <div class="card">
-    <h2>🔞 Sexchat</h2>
+    <h2> Sexchat</h2>
     <div class="price">€25</div>
     <button onclick="acquista('Sexchat', 25)">
       Acquista
@@ -60,7 +60,7 @@
   </div>
 
   <div class="card">
-    <h2>🎥 Video personalizzato</h2>
+    <h2> Video personalizzato</h2>
     <div class="price">€25</div>
     <button onclick="acquista('Video personalizzato', 25)">
       Acquista
