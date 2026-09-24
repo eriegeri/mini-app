@@ -54,7 +54,7 @@
   <div class="card">
     <h2>🔞 Sexchat</h2>
     <div class="price">€25</div>
-    <button onclick="acquista('Sexchat', 25)">
+    <button onclick="acquista('Sexchat')">
       Acquista
     </button>
   </div>
@@ -62,7 +62,7 @@
   <div class="card">
     <h2>🎥 Video personalizzato</h2>
     <div class="price">€25</div>
-    <button onclick="acquista('Video personalizzato', 25)">
+    <button onclick="acquista('Video personalizzato')">
       Acquista
     </button>
   </div>
@@ -70,7 +70,7 @@
   <div class="card">
     <h2>📹 Videochiamata</h2>
     <div class="price">€50</div>
-    <button onclick="acquista('Videochiamata', 50)">
+    <button onclick="acquista('Videochiamata')">
       Acquista
     </button>
   </div>
@@ -83,41 +83,38 @@
 
     const BACKEND_URL = "https://telegram-mini-app-kpb9.onrender.com";
 
-async function acquista(servizio) {
-  try {
-    const response = await fetch(`${BACKEND_URL}/create-invoice`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        service: servizio
-      })
-    });
+    async function acquista(servizio) {
+      try {
+        const response = await fetch(`${BACKEND_URL}/create-invoice`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            service: servizio
+          })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok || !data.invoice_url) {
-      tg.showAlert("Errore nella creazione del pagamento.");
-      return;
-    }
+        if (!response.ok || !data.invoice_url) {
+          tg.showAlert("Errore nella creazione del pagamento.");
+          return;
+        }
 
-    tg.openInvoice(data.invoice_url, (status) => {
-      if (status === "paid") {
-        tg.showAlert("Pagamento completato!");
-      } else if (status === "cancelled") {
-        tg.showAlert("Pagamento annullato.");
-      } else if (status === "failed") {
-        tg.showAlert("Pagamento non riuscito.");
+        tg.openInvoice(data.invoice_url, (status) => {
+          if (status === "paid") {
+            tg.showAlert("Pagamento completato!");
+          } else if (status === "cancelled") {
+            tg.showAlert("Pagamento annullato.");
+          } else if (status === "failed") {
+            tg.showAlert("Pagamento non riuscito.");
+          }
+        });
+
+      } catch (error) {
+        tg.showAlert("Errore di connessione.");
       }
-    });
-
-  } catch (error) {
-    tg.showAlert("Errore di connessione.");
-  }
-}
-
-      // Qui collegheremo il pagamento Telegram Stars.
     }
   </script>
 
