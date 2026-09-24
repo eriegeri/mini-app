@@ -44,6 +44,100 @@
       background: #2481cc;
       color: white;
     }
+
+    /* =========================
+       MINI GIOCO
+    ========================= */
+
+    #gameScreen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #111;
+      color: white;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    #gameTop {
+      height: 65px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #191919;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #gameArea {
+      position: absolute;
+      top: 65px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      overflow: hidden;
+    }
+
+    .target {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      background: #ff3b81;
+      box-shadow: 0 0 20px rgba(255, 59, 129, .6);
+
+      font-size: 30px;
+      cursor: pointer;
+
+      animation: appear .12s ease-out;
+    }
+
+    .special {
+      width: 85px;
+      height: 85px;
+      background: #ff9800;
+      box-shadow: 0 0 25px rgba(255, 152, 0, .7);
+    }
+
+    @keyframes appear {
+      from {
+        transform: scale(0);
+      }
+
+      to {
+        transform: scale(1);
+      }
+    }
+
+    #resultScreen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #111;
+      color: white;
+      z-index: 10000;
+
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    #resultScore {
+      font-size: 64px;
+      font-weight: bold;
+      margin: 10px;
+    }
+
+    .closeGame {
+      background: #444;
+      margin-top: 12px;
+    }
   </style>
 </head>
 
@@ -54,6 +148,7 @@
   <div class="card">
     <h2>🔞 Sexchat</h2>
     <div class="price">€25</div>
+
     <button onclick="window.open('https://www.paypal.me/marissamarlin44', '_blank')">
       Acquista
     </button>
@@ -62,6 +157,7 @@
   <div class="card">
     <h2>🎥 Video personalizzato</h2>
     <div class="price">€25</div>
+
     <button onclick="acquista('Video personalizzato')">
       Acquista
     </button>
@@ -70,58 +166,442 @@
   <div class="card">
     <h2>📹 Videochiamata</h2>
     <div class="price">€50</div>
+
     <button onclick="acquista('Videochiamata')">
       Acquista
     </button>
   </div>
 
-<div class="card">
-  <h2>📦 Incontri</h2>
-  <div class="price">€90</div>
-  <button onclick="window.open('https://www.paypal.me/marissamarlin44', '_blank')">Acquista</button>
-</div>
+  <div class="card">
+    <h2>📦 Incontri</h2>
+    <div class="price">€90</div>
+
+    <button onclick="window.open('https://www.paypal.me/marissamarlin44', '_blank')">
+      Acquista
+    </button>
+  </div>
+
+  <!-- =========================
+       MINI GIOCO
+  ========================= -->
+
+  <div class="card">
+    <h2>🎮 Catch 'Em</h2>
+
+    <p>
+      30 secondi per fare più punti possibile.
+    </p>
+
+    <div class="price">50 ⭐</div>
+
+    <button onclick="acquistaGioco()">
+      GIOCA
+    </button>
+  </div>
+
+
+  <!-- SCHERMATA GIOCO -->
+
+  <div id="gameScreen">
+
+    <div id="gameTop">
+      <span>⏱️ <span id="timer">30</span></span>
+      <span>🔥 x<span id="combo">1</span></span>
+      <span>⭐ <span id="score">0</span></span>
+    </div>
+
+    <div id="gameArea"></div>
+
+  </div>
+
+
+  <!-- RISULTATO -->
+
+  <div id="resultScreen">
+
+    <h1>🎉 Fine partita!</h1>
+
+    <div id="resultScore">0</div>
+
+    <p>
+      Punteggio
+    </p>
+
+    <p>
+      🏆 Record:
+      <strong id="record">0</strong>
+    </p>
+
+    <button onclick="chiudiRisultato()">
+      Torna al menu
+    </button>
+
+  </div>
+
 
   <script>
+
     const tg = window.Telegram.WebApp;
 
     tg.ready();
     tg.expand();
 
-    const BACKEND_URL = "https://telegram-mini-app-kpb9.onrender.com";
+    const BACKEND_URL =
+      "https://telegram-mini-app-kpb9.onrender.com";
+
+
+    /* =========================
+       PAGAMENTI SERVIZI
+    ========================= */
 
     async function acquista(servizio) {
+
       try {
-        const response = await fetch(`${BACKEND_URL}/create-invoice`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            service: servizio
-          })
-        });
+
+        const response = await fetch(
+          `${BACKEND_URL}/create-invoice`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              service: servizio
+            })
+          }
+        );
 
         const data = await response.json();
 
         if (!response.ok || !data.invoice_url) {
-          tg.showAlert("Errore nella creazione del pagamento.");
+
+          tg.showAlert(
+            "Errore nella creazione del pagamento."
+          );
+
           return;
         }
 
-        tg.openInvoice(data.invoice_url, (status) => {
-          if (status === "paid") {
-            tg.showAlert("Pagamento completato!");
-          } else if (status === "cancelled") {
-            tg.showAlert("Pagamento annullato.");
-          } else if (status === "failed") {
-            tg.showAlert("Pagamento non riuscito.");
+        tg.openInvoice(
+          data.invoice_url,
+          (status) => {
+
+            if (status === "paid") {
+
+              tg.showAlert(
+                "Pagamento completato!"
+              );
+
+            } else if (status === "cancelled") {
+
+              tg.showAlert(
+                "Pagamento annullato."
+              );
+
+            } else if (status === "failed") {
+
+              tg.showAlert(
+                "Pagamento non riuscito."
+              );
+
+            }
+
           }
-        });
+        );
 
       } catch (error) {
-        tg.showAlert("Errore di connessione.");
+
+        console.error(error);
+
+        tg.showAlert(
+          "Errore di connessione."
+        );
       }
     }
+
+
+    /* =========================
+       PAGAMENTO GIOCO
+    ========================= */
+
+    async function acquistaGioco() {
+
+      try {
+
+        const response = await fetch(
+          `${BACKEND_URL}/create-game-invoice`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              service: "Catch Em",
+              price: 50
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.invoice_url) {
+
+          tg.showAlert(
+            "Errore nella creazione del pagamento."
+          );
+
+          return;
+        }
+
+        tg.openInvoice(
+          data.invoice_url,
+          (status) => {
+
+            if (status === "paid") {
+
+              startGame();
+
+            } else if (status === "cancelled") {
+
+              tg.showAlert(
+                "Pagamento annullato."
+              );
+
+            } else if (status === "failed") {
+
+              tg.showAlert(
+                "Pagamento non riuscito."
+              );
+
+            }
+
+          }
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        tg.showAlert(
+          "Errore di connessione."
+        );
+      }
+    }
+
+
+    /* =========================
+       GIOCO
+    ========================= */
+
+    let score = 0;
+    let combo = 1;
+    let timeLeft = 30;
+
+    let timerInterval = null;
+    let spawnInterval = null;
+
+
+    function startGame() {
+
+      score = 0;
+      combo = 1;
+      timeLeft = 30;
+
+      document.getElementById("score").textContent = score;
+      document.getElementById("combo").textContent = combo;
+      document.getElementById("timer").textContent = timeLeft;
+
+      document.getElementById("gameArea").innerHTML = "";
+
+      document.getElementById("gameScreen").style.display =
+        "block";
+
+
+      timerInterval = setInterval(() => {
+
+        timeLeft--;
+
+        document.getElementById("timer").textContent =
+          timeLeft;
+
+        if (timeLeft <= 0) {
+
+          endGame();
+
+        }
+
+      }, 1000);
+
+
+      spawnInterval = setInterval(() => {
+
+        creaBersaglio();
+
+      }, 650);
+
+
+      creaBersaglio();
+    }
+
+
+    function creaBersaglio() {
+
+      const area =
+        document.getElementById("gameArea");
+
+      const target =
+        document.createElement("div");
+
+
+      const speciale =
+        Math.random() < 0.12;
+
+
+      target.className =
+        speciale
+          ? "target special"
+          : "target";
+
+
+      target.textContent =
+        speciale
+          ? "🔥"
+          : "♥";
+
+
+      const maxX =
+        Math.max(10, area.clientWidth - 100);
+
+      const maxY =
+        Math.max(10, area.clientHeight - 100);
+
+
+      target.style.left =
+        Math.random() * maxX + "px";
+
+      target.style.top =
+        Math.random() * maxY + "px";
+
+
+      target.addEventListener(
+        "pointerdown",
+        () => {
+
+          const punti =
+            speciale
+              ? 5
+              : 1;
+
+
+          score += punti * combo;
+
+
+          combo++;
+
+          if (combo > 3) {
+            combo = 3;
+          }
+
+
+          document.getElementById(
+            "score"
+          ).textContent = score;
+
+
+          document.getElementById(
+            "combo"
+          ).textContent = combo;
+
+
+          target.remove();
+
+        }
+      );
+
+
+      area.appendChild(target);
+
+
+      setTimeout(() => {
+
+        if (target.isConnected) {
+
+          target.remove();
+
+          combo = 1;
+
+          document.getElementById(
+            "combo"
+          ).textContent = combo;
+        }
+
+      }, 1000);
+    }
+
+
+    function endGame() {
+
+      clearInterval(timerInterval);
+      clearInterval(spawnInterval);
+
+
+      document.getElementById(
+        "gameArea"
+      ).innerHTML = "";
+
+
+      let record =
+        Number(
+          localStorage.getItem(
+            "catchEmRecord"
+          ) || 0
+        );
+
+
+      if (score > record) {
+
+        record = score;
+
+        localStorage.setItem(
+          "catchEmRecord",
+          record
+        );
+      }
+
+
+      document.getElementById(
+        "resultScore"
+      ).textContent = score;
+
+
+      document.getElementById(
+        "record"
+      ).textContent = record;
+
+
+      document.getElementById(
+        "gameScreen"
+      ).style.display = "none";
+
+
+      document.getElementById(
+        "resultScreen"
+      ).style.display = "flex";
+    }
+
+
+    function chiudiRisultato() {
+
+      document.getElementById(
+        "resultScreen"
+      ).style.display = "none";
+
+    }
+
   </script>
 
 </body>
