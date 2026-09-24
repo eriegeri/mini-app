@@ -19,6 +19,7 @@ SERVICES = {
 def home():
     return "Bot backend attivo"
 
+
 @app.route("/create-invoice", methods=["POST"])
 def create_invoice():
     data = request.get_json() or {}
@@ -96,22 +97,23 @@ def telegram_webhook():
         payment = update["message"].get("successful_payment")
 
         if payment:
-    print("Pagamento ricevuto:", payment)
+            print("Pagamento ricevuto:", payment)
 
-    admin_chat_id = os.environ.get("ADMIN_CHAT_ID")
+            admin_chat_id = os.environ.get("ADMIN_CHAT_ID")
 
-    if admin_chat_id:
-        requests.post(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-            json={
-                "chat_id": admin_chat_id,
-                "text": (
-                    "💰 Pagamento ricevuto!\n\n"
-                    "📦 Prodotto: Incontri\n"
-                    "💶 Importo: 150 €"
-                
-            }
-        )
+            if admin_chat_id:
+                requests.post(
+                    f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                    json={
+                        "chat_id": admin_chat_id,
+                        "text": (
+                            "💰 Pagamento ricevuto!\n\n"
+                            "📦 Prodotto: Incontri\n"
+                            "💶 Importo: 150 €"
+                        )
+                    }
+                )
+
     return "OK"
 
 
