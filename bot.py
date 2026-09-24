@@ -27,23 +27,46 @@ def create_invoice():
     if service not in SERVICES:
         return jsonify({"error": "Servizio non valido"}), 400
 
-    stars = SERVICES[service]
-
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/createInvoiceLink"
 
-    payload = {
-        "title": service,
-        "description": f"Acquisto: {service}",
-        "payload": service,
-        "provider_token": "",
-        "currency": "XTR",
-        "prices": [
-            {
-                "label": service,
-                "amount": stars
-            }
-        ]
-    }
+    # Pagamento con carta tramite Redsys
+    if service == "Incontri":
+        provider_token = os.environ.get("REDSYS_TEST_TOKEN")
+
+        if not provider_token:
+            return jsonify({"error": "Token Redsys non configurato"}), 500
+
+        payload = {
+            "title": service,
+            "description": "Acquisto: Incontri",
+            "payload": service,
+            "provider_token": provider_token,
+            "currency": "EUR",
+            "prices": [
+                {
+                    "label": service,
+                    "amount": 15000
+                }
+            ]
+        }
+
+    # Pagamento con Telegram Stars
+    else:
+        stars = SERVICES[service]
+
+        payload = {
+            "title": service,
+            "description": f"Acquisto: {service}",
+            "payload": service,
+            "provider_token": "",
+            "currency": "XTR",
+            "prices": [
+                {
+                    "label": service,
+                    "amount": stars
+                }
+            ]
+        }
 
     response = requests.post(url, json=payload)
     result = response.json()
