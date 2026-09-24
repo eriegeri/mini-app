@@ -81,10 +81,41 @@
     tg.ready();
     tg.expand();
 
-    function acquista(servizio, prezzo) {
-      tg.showAlert(
-        `Hai scelto: ${servizio}\nPrezzo: €${prezzo}`
-      );
+    const BACKEND_URL = "https://telegram-mini-app-kpb9.onrender.com";
+
+async function acquista(servizio) {
+  try {
+    const response = await fetch(`${BACKEND_URL}/create-invoice`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        service: servizio
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.invoice_url) {
+      tg.showAlert("Errore nella creazione del pagamento.");
+      return;
+    }
+
+    tg.openInvoice(data.invoice_url, (status) => {
+      if (status === "paid") {
+        tg.showAlert("Pagamento completato!");
+      } else if (status === "cancelled") {
+        tg.showAlert("Pagamento annullato.");
+      } else if (status === "failed") {
+        tg.showAlert("Pagamento non riuscito.");
+      }
+    });
+
+  } catch (error) {
+    tg.showAlert("Errore di connessione.");
+  }
+}
 
       // Qui collegheremo il pagamento Telegram Stars.
     }
