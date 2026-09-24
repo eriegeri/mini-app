@@ -11,7 +11,8 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 SERVICES = {
     "Sexchat": 2000,
     "Video personalizzato": 2000,
-    "Videochiamata": 4000
+    "Videochiamata": 4000,
+    "Incontri": 15000
 }
 
 @app.route("/")
